@@ -1,0 +1,8 @@
+vim /etc/network/interfaces
+>   iface enp0s3 inet static
+>      address 10.0.2.0
+>      netmask 255.255.255.252
+>      gateway 10.0.2.2
+service networking restart
+ifdown enp0s3
+ifup enp0s3
