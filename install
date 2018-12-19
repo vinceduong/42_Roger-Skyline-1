@@ -6,4 +6,4 @@ sudo apt-get install iptables-persistent -y
 sudo apt-get install vim -y
 sudo apt-get install fail2ban -y
 sudo apt-get install ssmtp -y
-sudo apt-get install iptables-persistent -y
+sudo apt-get install mailutils -y
