@@ -1,0 +1,23 @@
+mkdir .ssh
+
+ssh-keygen
+
+change port : 
+	sudo vim /etc/ssh/sshd_config
+	port 22 -> port [PORT]
+	-PermitRootLogin yes -> no
+
+	-AuthentificationPassword yes -> no
+
+	-PubkeyAuthentication yes -> yes
+
+	-PermitEmptyPasswords no
+
+	AutorizedKeysFile -> .ssh/id_rsa .ssh/id_rsa.pub
+
+sudo /etc/init.d/ssh retstart
+
+sudo iptables -A INPUT -p tcp -m tcp --dport [PORT] -j ACCEPT
+
+check ssh : 
+	ssh -p [PORT] [login]@[ip]

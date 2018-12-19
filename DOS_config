@@ -1,0 +1,20 @@
+sudo iptables -A INPUT -m limit --limit-burst 10 --limit 30/second -j DROP
+
+change jail.conf : 
+	sudo vim /etc/fail2ban/jail.conf
+
+	add :
+			[http-get-dos]
+			enabled = true
+			port = http,https
+			filter = http-get-dos
+			logpath = /var/log/varnish/access.log
+			maxretry = 300
+			findtime = 300
+			#ban for 5 minutes
+			bantime = 600
+			action = iptables[name=HTTP, port=http, protocol=tcp]
+
+	add :
+			ignoreip = 192.168.0.111
+			ignoreip = 255.255.255.252
