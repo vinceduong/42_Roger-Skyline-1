@@ -7,7 +7,7 @@ change port :
 	port 22 -> port [PORT]
 	-PermitRootLogin yes -> no
 
-	-AuthentificationPassword yes -> no
+	-PasswordAuthentification yes -> no
 
 	-PubkeyAuthentication yes -> yes
 
