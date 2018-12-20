@@ -7,5 +7,5 @@ sudo apt-get install vim -y
 sudo apt-get install fail2ban -y
 sudo apt-get install ssmtp -y
 sudo apt-get install mailutils -y
-sudo usermod -a -G sudo vduong
+sudo usermod -a -G sudo roger
 sudo apt-get install postfix -y
