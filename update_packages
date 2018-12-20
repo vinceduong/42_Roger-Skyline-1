@@ -1,0 +1,8 @@
+if [ ! -e /var/log/update_script.log ]
+then
+        sudo touch /var/log/update_script.log
+fi
+sudo chmod 777 /var/log/update_script.log
+sudo apt-get -y update >> /var/log/update_script.log
+sudo apt-get -y upgrade >> /var/log/update_script.log
+sudo chmod 644 /var/log/update_script.log
