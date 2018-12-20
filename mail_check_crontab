@@ -9,7 +9,11 @@ reference=`cat ~/check`
 actual=`md5sum /etc/crontab`
 if [ "$reference" != "$actual" ]
 then
-	echo "file has been modified, envoie du mail a $root\n"
-	echo "crontab file has been modified" | mail -s "crontab modification" root
+	echo "file has been modified, envoie du mail a root\n"
+	echo "Crontab file has been modified" | mail -s "crontab modification" root
 	rm ~/check
+	touch ~/check
+	chmod 777 ~/check
+	md5sum /etc/crontab >> ~/check
+	chmod 644 ~/check
 fi
