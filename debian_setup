@@ -8,4 +8,4 @@ sudo apt-get install fail2ban -y
 sudo apt-get install ssmtp -y
 sudo apt-get install mailutils -y
 sudo usermod -a -G sudo vduong
-sudo apt-get install postfix
+sudo apt-get install postfix -y
