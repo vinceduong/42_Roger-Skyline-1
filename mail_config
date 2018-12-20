@@ -1,0 +1,2 @@
+postfix config : sudo dpkg-reconfigure postfix
+select all default options
