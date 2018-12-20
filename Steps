@@ -1,0 +1,177 @@
+30159cfcbb1353ddd867f3105349bff1ce2b62c0  -
+
+	********************************************
+	*										   *
+	*				   SETUP	   			   *
+	*									       *
+	********************************************
+
+[PORT] = 55222
+
+		passer en root
+
+	apt-get install sudo -y
+	usermod -aG sudo [login]
+	restart (exit , exit)
+
+		installation des packets
+
+	sudo apt-get update
+	sudo apt-get upgrade
+	sudo apt-get install net-tools
+	sudo apt-get install dnsutils
+	sudo apt-get install iptables-persistent
+	sudo apt-get install vim
+	sudo apt-get install fail2ban
+	sudo apt-get install ssmtp -y
+	sudo apt-get install mailutils -y
+	sudo usermod -a -G sudo roger
+	sudo apt-get install postfix -y
+	sudo iptables -F
+
+	********************************************
+	*										   *
+	*				   RESEAU 	   			   *
+	*									       *
+	********************************************
+
+	sudo vim /etc/network/interfaces
+
+		remplacer dhcp -> static
+			address 10.0.2.0
+			netmask 255.255.255.252
+			gateway 10.0.2.2
+
+
+	********************************************
+	*										   *
+	*				   SSH  	   			   *
+	*									       *
+	********************************************
+
+		mkdir .ssh
+		ssh-keygen
+
+		changer le port
+			sudo vim /etc/ssh/sshd_config
+
+	port 22 -> port [PORT]
+	-PermitRootLogin yes -> no
+	-PasswordAuthentification yes -> no
+	-PubkeyAuthentication yes -> yes
+	-PermitEmptyPasswords no
+	AutorizedKeysFile -> .ssh/id_rsa .ssh/id_rsa.pub
+
+	sudo /etc/init.d/ssh restart
+
+	sudo iptables -A INPUT -p tcp -m tcp --dport [PORT] -j ACCEPT
+
+	ssh -p [PORT] [login]@[ip]
+
+		to check if it's working
+
+
+	********************************************
+	*										   *
+	*				FIREWALL	   		       *
+	*									       *
+	********************************************
+
+		reset les parametres par defaut
+
+	sudo iptables -F
+	sudo iptables -X
+	sudo iptables -t nat -F
+	sudo iptables -t nat -X
+	sudo iptables -t mangle -F
+	sudo iptables -t mangle -X
+	sudo iptables -P INPUT ACCEPT
+	sudo iptables -P FORWARD ACCEPT
+	sudo iptables -P OUTPUT ACCEPT
+	sudo iptables -A INPUT -p tcp -m tcp --dport [PORT] -j ACCEPT
+
+		Setup le Pare-Feu
+
+	sudo iptables -P INPUT DROP
+	sudo iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+	sudo iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+	sudo iptables -A INPUT -p tcp -m tcp --dport [PORT] -j ACCEPT
+
+	********************************************
+	*										   *
+	*				DOS	   		               *
+	*									       *
+	********************************************
+
+	sudo iptables -A INPUT -m limit --limit-burst 10 --limit 30/s -j DROP
+
+	sudo vim /etc/fail2ban/jail.conf
+
+	add this =
+		[http-get-dos]
+		enabled = true
+		port = http,https
+		filter = http-get-dos
+		logpath = /var/log/varnish/access.log
+		maxretry = 300
+		findtime = 300
+		bantime = 600
+		action = iptables[name=HTTP, port=http, protocol=tcp]
+
+	add this two line
+		ignoreip = 10.0.2.0
+
+	********************************************
+	*										   *
+	*		      PORT SCAN   		           *
+	*									       *
+	********************************************
+
+	iptables -N port_scan
+	iptables -A port_scan -p tcp --tcp-flags SYN,ACK,FIN,RST RST -m
+		limit --limit 60/s --limit-burst 2 -j RETURN
+	iptables -A port_scan -j DROP
+
+	********************************************
+	*										   *
+	*		      SCRIPTS   		           *
+	*									       *
+	********************************************
+
+	if [ ! -e ~/check ]
+	then
+		touch ~/check
+		chmod 777 ~/check
+		md5sum /etc/crontab >> ~/check
+		chmod 644 ~/check
+	fi
+	reference=`cat ~/check`
+	actual=`md5sum /etc/crontab`
+	root=`cat /etc/aliases`
+	if [ "$reference" != "$actual" ]
+	then
+		echo "file has been modified, envoie du mail a $root\n"
+		echo "crontab file has been modified" | mail -s "crontab modification" root
+		rm ~/check
+		touch ~/check
+		chmod 777 ~/check
+		md5sum /etc/crontab >> ~/check
+		chmod 644 ~/check
+	fi
+
+	if [ ! -e /var/log/update_script.log ]
+	then
+	        sudo touch /var/log/update_script.log
+	fi
+	sudo chmod 777 /var/log/update_script.log
+	sudo apt-get -y update >> /var/log/update_script.log
+	sudo apt-get -y upgrade >> /var/log/update_script.log
+	sudo chmod 644 /var/log/update_script.log
+
+# Add crons to cronlist using crontab -e
+0 4 * * 1 /etc/cron.d/update_packages
+@reboot /etc/cron.d/update_packages
+0 0 * * * /etc/cron.d/mail_check_crontab
+
+sudo cp ./mail_check_crontab /etc/cron.d/
+sudo cp ./update_packages /etc/cron.d/
