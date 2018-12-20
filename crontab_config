@@ -1,0 +1,4 @@
+Add crons to cronlist using crontab -e : 
+	0 4 * * 1 /etc/cron.d/update_packages
+	@reboot /etc/cron.d/update_packages
+	0 0 * * * /etc/cron.d/mail_check_crontab
