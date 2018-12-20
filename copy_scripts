@@ -1,2 +1,2 @@
-cp mail_check_crontab /etc/cron.d/ 
-cp update_packages /etc/cron.d/ 
+sudo cp ./mail_check_crontab /etc/cron.d/ 
+sudo cp ./update_packages /etc/cron.d/ 
